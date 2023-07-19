@@ -1,8 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shopping_app/lib/data/categories.dart';
 import 'package:shopping_app/lib/models/Categories.dart';
-import 'package:shopping_app/lib/models/grocery_item.dart';
 
 class NewItem extends StatefulWidget {
   const NewItem({super.key});
@@ -17,16 +17,19 @@ class _NewItemState extends State<NewItem> {
   void _saveButton() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final url = Uri.https('flutter-shop-8b54d-default-rtdb.asia-southeast1.firebasedatabase.app',
-          'shoping-list.json');
+      final url = Uri.https(
+          'flutter-shop-http-e7735-default-rtdb.europe-west1.firebasedatabase.app',
+          'shopping-list.json');
       http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: {
-          'name': _itemTitle,
-          'quantity': _itemQuantity,
-          'category': _itemCategory.title
-        },
+        body: json.encode(
+          {
+            'name': _itemTitle,
+            'quantity': _itemQuantity,
+            'category': _itemCategory.title
+          },
+        ),
       );
     }
   }
