@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shopping_app/lib/data/categories.dart';
 import 'package:shopping_app/lib/models/Categories.dart';
 import 'package:shopping_app/lib/models/grocery_item.dart';
@@ -17,7 +17,17 @@ class _NewItemState extends State<NewItem> {
   void _saveButton() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      Navigator.of(context).pop(GroceryItem(id: DateTime.now().toString(), name: _itemTitle, quantity: _itemQuantity, category: _itemCategory));
+      final url = Uri.https('flutter-shop-8b54d-default-rtdb.asia-southeast1.firebasedatabase.app',
+          'shoping-list.json');
+      http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: {
+          'name': _itemTitle,
+          'quantity': _itemQuantity,
+          'category': _itemCategory.title
+        },
+      );
     }
   }
 
@@ -39,7 +49,6 @@ class _NewItemState extends State<NewItem> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               TextFormField(
-
                 maxLength: 50,
                 decoration: const InputDecoration(
                   label: Text('Title'),
@@ -53,7 +62,9 @@ class _NewItemState extends State<NewItem> {
                   }
                   return null;
                 },
-                onSaved: (value) { _itemTitle = value!;},
+                onSaved: (value) {
+                  _itemTitle = value!;
+                },
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -72,7 +83,6 @@ class _NewItemState extends State<NewItem> {
                       },
                       initialValue: '1',
                       onSaved: (value) => _itemQuantity = int.parse(value!),
-
                     ),
                   ),
                   const SizedBox(
@@ -104,7 +114,8 @@ class _NewItemState extends State<NewItem> {
                         onChanged: (value) {
                           setState(() {
                             _itemCategory = value!;
-                          }); }),
+                          });
+                        }),
                   )
                 ],
               ),
