@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shopping_app/lib/data/categories.dart';
+import 'package:shopping_app/lib/models/Categories.dart';
+import 'package:shopping_app/lib/models/grocery_item.dart';
 
 class NewItem extends StatefulWidget {
   const NewItem({super.key});
@@ -10,6 +12,19 @@ class NewItem extends StatefulWidget {
 }
 
 class _NewItemState extends State<NewItem> {
+  final _formKey = GlobalKey<FormState>();
+
+  void _saveButton() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      Navigator.of(context).pop(GroceryItem(id: DateTime.now().toString(), name: _itemTitle, quantity: _itemQuantity, category: _itemCategory));
+    }
+  }
+
+  var _itemTitle = '';
+  var _itemQuantity = 1;
+  var _itemCategory = categories[Categories.vegetables]!;
+
   @override
   Widget build(context) {
     return Scaffold(
@@ -17,12 +32,14 @@ class _NewItemState extends State<NewItem> {
         title: const Text('New Item'),
       ),
       body: Form(
+        key: _formKey,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               TextFormField(
+
                 maxLength: 50,
                 decoration: const InputDecoration(
                   label: Text('Title'),
@@ -36,6 +53,7 @@ class _NewItemState extends State<NewItem> {
                   }
                   return null;
                 },
+                onSaved: (value) { _itemTitle = value!;},
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -53,31 +71,40 @@ class _NewItemState extends State<NewItem> {
                         return null;
                       },
                       initialValue: '1',
+                      onSaved: (value) => _itemQuantity = int.parse(value!),
+
                     ),
                   ),
                   const SizedBox(
                     width: 10,
                   ),
                   Expanded(
-                    child: DropdownButtonFormField(items: [
-                      for (final category in categories.entries)
-                        DropdownMenuItem(
-                            value: category.value,
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.only(left: 8),
-                                  width: 16,
-                                  height: 16,
-                                  color: category.value.color,
-                                ),
-                                const SizedBox(
-                                  width: 8,
-                                ),
-                                Text(category.value.title)
-                              ],
-                            ))
-                    ], onChanged: (value) {}),
+                    child: DropdownButtonFormField(
+                        value: _itemCategory,
+                        onSaved: (value) => _itemCategory = value!,
+                        items: [
+                          for (final category in categories.entries)
+                            DropdownMenuItem(
+                                value: category.value,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.only(left: 8),
+                                      width: 16,
+                                      height: 16,
+                                      color: category.value.color,
+                                    ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    Text(category.value.title)
+                                  ],
+                                ))
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _itemCategory = value!;
+                          }); }),
                   )
                 ],
               ),
@@ -87,8 +114,13 @@ class _NewItemState extends State<NewItem> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(onPressed: () {}, child: Text('Reset')),
-                  ElevatedButton(onPressed: () {}, child: Text('Add Item'))
+                  TextButton(
+                      onPressed: () {
+                        _formKey.currentState!.reset();
+                      },
+                      child: Text('Reset')),
+                  ElevatedButton(
+                      onPressed: _saveButton, child: Text('Add Item'))
                 ],
               )
             ],
