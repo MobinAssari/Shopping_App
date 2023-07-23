@@ -35,6 +35,14 @@ class _FirstScreenState extends State<FirstScreen> {
         _errorText = 'failed to connect to Database, try again';
       });
     }
+
+    if(response.body == 'null') {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
     final Map<String, dynamic> listData = json.decode(
         response.body);
     final List<GroceryItem> _loadedItems = [];
@@ -95,8 +103,11 @@ class _FirstScreenState extends State<FirstScreen> {
                 final url = Uri.https(
                     'flutter-shop-http-e7735-default-rtdb.europe-west1.firebasedatabase.app',
                     'shopping-list/${_groceryItemsList[index].id}.json');
-                http.delete(url);
-                _groceryItemsList.remove(_groceryItemsList[index]);
+                setState(() {
+                  http.delete(url);
+                  _groceryItemsList.remove(_groceryItemsList[index]);
+                });
+
               },
             ),
       );
