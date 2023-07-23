@@ -14,13 +14,13 @@ class NewItem extends StatefulWidget {
 class _NewItemState extends State<NewItem> {
   final _formKey = GlobalKey<FormState>();
 
-  void _saveButton () async {
+  void _saveButton() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final url = Uri.https(
           'flutter-shop-http-e7735-default-rtdb.europe-west1.firebasedatabase.app',
           'shopping-list.json');
-      final response = await http.post(
+      await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: json.encode(
@@ -31,7 +31,7 @@ class _NewItemState extends State<NewItem> {
           },
         ),
       );
-      if(!context.mounted) return;
+      if (!context.mounted) return;
       Navigator.of(context).pop();
     }
   }
