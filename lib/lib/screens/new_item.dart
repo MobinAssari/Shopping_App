@@ -13,9 +13,13 @@ class NewItem extends StatefulWidget {
 
 class _NewItemState extends State<NewItem> {
   final _formKey = GlobalKey<FormState>();
+  var _isSending = false;
 
   void _saveButton() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isSending = true;
+      });
       _formKey.currentState!.save();
       final url = Uri.https(
           'flutter-shop-http-e7735-default-rtdb.europe-west1.firebasedatabase.app',
@@ -131,12 +135,20 @@ class _NewItemState extends State<NewItem> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                      onPressed: () {
-                        _formKey.currentState!.reset();
-                      },
+                      onPressed: _isSending
+                          ? null
+                          : () {
+                              _formKey.currentState!.reset();
+                            },
                       child: Text('Reset')),
                   ElevatedButton(
-                      onPressed: _saveButton, child: Text('Add Item'))
+                      onPressed: _isSending ? null : _saveButton,
+                      child: _isSending
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20, child: CircularProgressIndicator(),
+                            )
+                          : const Text('Add Item'))
                 ],
               )
             ],

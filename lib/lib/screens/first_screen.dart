@@ -15,6 +15,9 @@ class FirstScreen extends StatefulWidget {
 
 class _FirstScreenState extends State<FirstScreen> {
   List<GroceryItem> _groceryItemsList = [];
+  var _isLoading = true;
+  String? _errorText;
+
 
   @override
   void initState() {
@@ -27,6 +30,11 @@ class _FirstScreenState extends State<FirstScreen> {
         'flutter-shop-http-e7735-default-rtdb.europe-west1.firebasedatabase.app',
         'shopping-list.json');
     final response = await http.get(url);
+    if(response.statusCode>=400){
+      setState(() {
+        _errorText = 'failed to connect to Database, try again';
+      });
+    }
     final Map<String, dynamic> listData = json.decode(
         response.body);
     final List<GroceryItem> _loadedItems = [];
@@ -39,6 +47,7 @@ class _FirstScreenState extends State<FirstScreen> {
     }
     setState(() {
       _groceryItemsList = _loadedItems;
+      _isLoading = false;
     });
   }
 
@@ -56,11 +65,17 @@ class _FirstScreenState extends State<FirstScreen> {
   var mainContent;
 
   Widget build(context) {
+
+
     if (_groceryItemsList.isEmpty) {
       mainContent = const Center(
         child: Text('No item added yet!'),
       );
-    } else {
+    }
+    if(_isLoading){
+        mainContent = const Center(child: CircularProgressIndicator(),);
+      }
+    if(_groceryItemsList.isNotEmpty) {
       mainContent = ListView.builder(
         itemCount: _groceryItemsList.length,
         itemBuilder: (ctx, index) =>
@@ -77,10 +92,17 @@ class _FirstScreenState extends State<FirstScreen> {
 
                   ),
                 );
+                final url = Uri.https(
+                    'flutter-shop-http-e7735-default-rtdb.europe-west1.firebasedatabase.app',
+                    'shopping-list/${_groceryItemsList[index].id}.json');
+                http.delete(url);
                 _groceryItemsList.remove(_groceryItemsList[index]);
               },
             ),
       );
+    }
+    if(_errorText != null){
+      mainContent = Center(child: Text(_errorText!),);
     }
     return Scaffold(
       appBar: AppBar(
